@@ -13,6 +13,10 @@ from datetime import datetime, timedelta
 from database import get_db, engine, Base
 from models import ScholarProfile, Article
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
+import os
+from dotenv import load_dotenv
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,7 +29,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+load_dotenv()
+origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in origins if origin.strip()],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+)
 # ========== Utility Models ==========
 
 class ScholarRequest(BaseModel):
